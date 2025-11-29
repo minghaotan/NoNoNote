@@ -1,4 +1,3 @@
-
 import { Note, AppSettings } from '../types';
 
 const STORAGE_KEY = 'retro_notes_data';
@@ -27,7 +26,7 @@ export const getSettings = (): AppSettings => {
     const data = localStorage.getItem(SETTINGS_KEY);
     // Default to enabled if not found
     return data ? JSON.parse(data) : { enableAI: true };
-  } catch (error) {
+  } catch {
     return { enableAI: true };
   }
 };
