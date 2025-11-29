@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Button } from './Button';
 import { Note } from '../types';
 
@@ -9,48 +9,50 @@ interface ExportModalProps {
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, notes }) => {
+  // Initialize with all notes selected - recalculate when notes change
+  const allNoteIds = useMemo(() => new Set(notes.map((n) => n.id)), [notes]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
 
-  // Reset selected IDs when modal opens or notes change
-  useEffect(() => {
-    if (isOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedIds(new Set(notes.map((n) => n.id)));
-    }
-  }, [isOpen, notes]);
+  // Sync selectedIds when notes change (select all new notes)
+  const [prevNoteIds, setPrevNoteIds] = useState<Set<string>>(() => new Set());
+  if (isOpen && allNoteIds !== prevNoteIds) {
+    setSelectedIds(new Set(allNoteIds));
+    setPrevNoteIds(allNoteIds);
+  }
 
-  if (!isOpen) return null;
+  const toggleNote = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(id)) {
+        newSelected.delete(id);
+      } else {
+        newSelected.add(id);
+      }
+      return newSelected;
+    });
+  }, []);
 
-  const toggleNote = (id: string) => {
-    const newSelected = new Set(selectedIds);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedIds(newSelected);
-  };
+  const toggleAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      if (prev.size === notes.length) {
+        return new Set();
+      }
+      return new Set(notes.map((n) => n.id));
+    });
+  }, [notes]);
 
-  const toggleAll = () => {
-    if (selectedIds.size === notes.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(notes.map((n) => n.id)));
-    }
-  };
-
-  const getSelectedNotes = () => {
+  const selectedNotes = useMemo(() => {
     return notes.filter((n) => selectedIds.has(n.id));
-  };
+  }, [notes, selectedIds]);
 
-  const handleCopy = () => {
-    const json = JSON.stringify(getSelectedNotes(), null, 2);
+  const handleCopy = useCallback(() => {
+    const json = JSON.stringify(selectedNotes, null, 2);
     navigator.clipboard.writeText(json);
     alert('Copied to clipboard!');
-  };
+  }, [selectedNotes]);
 
-  const handleDownload = () => {
-    const json = JSON.stringify(getSelectedNotes(), null, 2);
+  const handleDownload = useCallback(() => {
+    const json = JSON.stringify(selectedNotes, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -60,7 +62,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, notes
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
+  }, [selectedNotes]);
+
+  if (!isOpen) return null;
 
   return (
     <div
@@ -126,7 +130,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, notes
               </span>
               <div className="bg-white border-2 border-ink p-2 max-h-32 overflow-auto">
                 <pre className="font-mono text-[10px] text-ink whitespace-pre-wrap break-all">
-                  {JSON.stringify(getSelectedNotes(), null, 2)}
+                  {JSON.stringify(selectedNotes, null, 2)}
                 </pre>
               </div>
             </div>
