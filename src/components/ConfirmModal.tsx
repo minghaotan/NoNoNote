@@ -31,7 +31,11 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose, onC
           <Button variant="secondary" onClick={onClose} className="flex-1">
             Cancel
           </Button>
-          <Button variant="primary" onClick={onConfirm} className="flex-1 btn-danger">
+          <Button
+            variant="primary"
+            onClick={onConfirm}
+            className="flex-1 !bg-accent hover:!bg-red-600"
+          >
             Delete
           </Button>
         </div>

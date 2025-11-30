@@ -74,11 +74,6 @@ body {
     @apply btn-base btn-retro-shadow p-3 rounded-full bg-ink text-white border-2 border-ink flex items-center justify-center hover:bg-ink-light;
   }
 
-  /* Danger button modifier */
-  .btn-danger {
-    @apply !bg-accent !text-white hover:!bg-red-600;
-  }
-
   /* Text button (minimal styling) */
   .btn-text {
     @apply font-mono text-sm font-bold uppercase tracking-widest hover:text-accent transition-colors;
