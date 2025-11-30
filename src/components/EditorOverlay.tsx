@@ -1,7 +1,10 @@
+/** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
 import React, { useState, useEffect, useRef } from 'react';
 import { Note } from '../types';
 import { Button } from './Button';
 import { polishText, continueThought } from '../services/geminiService';
+import { colors, shadows, fonts, fontSize, zIndex, mixins } from '../styles';
 
 interface EditorOverlayProps {
   isOpen: boolean;
@@ -10,6 +13,153 @@ interface EditorOverlayProps {
   onClose: () => void;
   enableAI: boolean;
 }
+
+const overlayStyles = css`
+  position: fixed;
+  inset: 0;
+  z-index: ${zIndex.overlay};
+  background-color: ${colors.paper};
+  display: flex;
+  flex-direction: column;
+  ${mixins.paperTexture}
+
+  @keyframes slideInFromBottom {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  animation: slideInFromBottom 300ms ease-out;
+`;
+
+const toolbarStyles = css`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 2px solid ${colors.ink};
+  background-color: ${colors.paper};
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+`;
+
+const closeButtonStyles = css`
+  color: ${colors.ink};
+  font-family: ${fonts.mono};
+  font-size: ${fontSize.base};
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    color: ${colors.accent};
+  }
+`;
+
+const statusContainerStyles = css`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const statusTextStyles = css`
+  font-family: ${fonts.mono};
+  font-size: ${fontSize.sm};
+  font-weight: 700;
+  color: rgba(26, 26, 26, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+`;
+
+const saveButtonStyles = css`
+  background-color: ${colors.ink};
+  color: ${colors.white};
+  font-family: ${fonts.mono};
+  font-size: ${fontSize.base};
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 2px solid ${colors.ink};
+  padding: 0.25rem 1rem;
+  box-shadow: ${shadows.accentGlow};
+  transition: all 150ms ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(26, 26, 26, 0.8);
+  }
+`;
+
+const editorContainerStyles = css`
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const textareaStyles = css`
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  padding: 1.5rem;
+  resize: none;
+  background: transparent;
+  font-family: ${fonts.mono};
+  font-size: ${fontSize.xl};
+  color: ${colors.ink};
+  line-height: 1.6;
+  border: none;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: rgba(26, 26, 26, 0.2);
+  }
+`;
+
+const aiToolbarStyles = css`
+  padding: 1rem;
+  border-top: 2px solid ${colors.ink};
+  background-color: ${colors.white};
+  padding-bottom: 2rem;
+  z-index: 20;
+
+  /* Safe area for mobile devices */
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+  }
+`;
+
+const aiButtonContainerStyles = css`
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  max-width: 28rem;
+  margin: 0 auto;
+  overflow-x: auto;
+`;
+
+const aiButtonStyles = css`
+  flex-shrink: 0;
+  font-size: ${fontSize.sm};
+  padding: 0.5rem 1rem;
+`;
 
 export const EditorOverlay: React.FC<EditorOverlayProps> = ({
   isOpen,
@@ -32,10 +182,8 @@ export const EditorOverlay: React.FC<EditorOverlayProps> = ({
     }
   }, [isOpen, initialNote]);
 
-  // Auto-focus on open
   useEffect(() => {
     if (isOpen && textareaRef.current) {
-      // Small timeout to allow animation to settle
       setTimeout(() => {
         textareaRef.current?.focus();
       }, 300);
@@ -48,7 +196,6 @@ export const EditorOverlay: React.FC<EditorOverlayProps> = ({
       return;
     }
 
-    // Auto-generate title internally for data structure
     const lines = content.trim().split('\n');
     const generatedTitle = (lines[0] ?? '').substring(0, 60).trim();
 
@@ -85,52 +232,41 @@ export const EditorOverlay: React.FC<EditorOverlayProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-paper flex flex-col paper-texture animate-in slide-in-from-bottom duration-300">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between p-4 border-b-2 border-ink bg-paper z-10 shadow-sm">
-        <button
-          onClick={onClose}
-          className="text-ink hover:text-accent font-mono text-sm font-bold uppercase tracking-widest px-2"
-        >
+    <div css={overlayStyles}>
+      <div css={toolbarStyles}>
+        <button onClick={onClose} css={closeButtonStyles}>
           Close
         </button>
 
-        <div className="flex items-center gap-4">
-          <span className="font-mono text-xs font-bold text-ink/40 uppercase tracking-widest hidden sm:inline-block">
-            {initialNote ? 'Editing' : 'New Note'}
-          </span>
+        <div css={statusContainerStyles}>
+          <span css={statusTextStyles}>{initialNote ? 'Editing' : 'New Note'}</span>
         </div>
 
-        <button
-          onClick={handleSave}
-          className="bg-ink text-white font-mono text-sm font-bold uppercase tracking-widest border-2 border-ink px-4 py-1 hover:bg-ink/80 transition-colors shadow-[2px_2px_0px_0px_rgba(255,82,82,1)]"
-        >
+        <button onClick={handleSave} css={saveButtonStyles}>
           Save
         </button>
       </div>
 
-      {/* Editor Area */}
-      <div className="flex-1 overflow-hidden relative w-full flex flex-col">
+      <div css={editorContainerStyles}>
         <textarea
           ref={textareaRef}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="flex-1 w-full h-full p-6 resize-none bg-transparent font-mono text-lg text-ink focus:outline-none leading-relaxed placeholder:text-ink/20"
+          css={textareaStyles}
           placeholder="Type your story here..."
           spellCheck={false}
         />
       </div>
 
-      {/* AI Tools Bar - Only shown if enabled */}
       {enableAI && (
-        <div className="p-4 border-t-2 border-ink bg-white pb-8 safe-area-bottom z-20">
-          <div className="flex gap-3 justify-center max-w-md mx-auto overflow-x-auto">
+        <div css={aiToolbarStyles}>
+          <div css={aiButtonContainerStyles}>
             <Button
               variant="secondary"
               onClick={handleAiPolish}
               disabled={!content || isAiProcessing}
               loading={isAiProcessing}
-              className="flex-shrink-0 text-xs px-4 py-2"
+              css={aiButtonStyles}
             >
               ✨ Polish
             </Button>
@@ -139,7 +275,7 @@ export const EditorOverlay: React.FC<EditorOverlayProps> = ({
               onClick={handleAiContinue}
               disabled={!content || isAiProcessing}
               loading={isAiProcessing}
-              className="flex-shrink-0 text-xs px-4 py-2"
+              css={aiButtonStyles}
             >
               🖊️ Continue
             </Button>

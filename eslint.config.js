@@ -46,6 +46,8 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+      // Allow the 'css' prop from @emotion/react
+      'react/no-unknown-property': ['error', { ignore: ['css'] }],
     },
   }
 );

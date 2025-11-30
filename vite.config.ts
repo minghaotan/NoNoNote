@@ -14,7 +14,14 @@ export default defineConfig(() => {
       // Allow CORS for Tauri dev
       ...(host ? { cors: true } : {}),
     },
-    plugins: [react()],
+    plugins: [
+      react({
+        jsxImportSource: '@emotion/react',
+        babel: {
+          plugins: ['@emotion/babel-plugin'],
+        },
+      }),
+    ],
     // Prevent clearing the screen in dev mode
     clearScreen: false,
     resolve: {
