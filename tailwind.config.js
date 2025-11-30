@@ -7,8 +7,23 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        mono: ['"Courier Prime"', 'monospace'],
-        serif: ['"Playfair Display"', 'serif'],
+        mono: [
+          'SF Mono',
+          'Menlo',
+          'Monaco',
+          'Consolas',
+          'Courier New',
+          'monospace'
+        ],
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Arial',
+          'sans-serif'
+        ],
       },
       colors: {
         paper: '#f2f0e9', // Vintage paper

@@ -6,6 +6,15 @@ body {
   background-color: #f2f0e9;
   color: #1a1a1a;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Better font rendering for mono font */
+.font-mono {
+  letter-spacing: -0.02em;
+  font-variant-ligatures: none;
 }
 
 /* Custom scrollbar to match retro theme */
@@ -19,7 +28,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: #1a1a1a;
-  border-radius: 0px;
+  border-radius: 0;
 }
 
 .paper-texture {
