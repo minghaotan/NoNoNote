@@ -1,14 +1,14 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI } from '@google/genai';
 
 // Safe initialization to prevent crash if process.env is missing in browser runtime
 const apiKey = typeof process !== 'undefined' && process.env ? process.env.API_KEY : '';
 const ai = new GoogleGenAI({ apiKey });
 
 export const polishText = async (text: string): Promise<string> => {
-  if (!text || text.trim().length === 0) return "";
+  if (!text || text.trim().length === 0) return '';
   if (!apiKey) {
-      console.warn("API Key not found");
-      return text;
+    console.warn('API Key not found');
+    return text;
   }
 
   try {
@@ -24,16 +24,16 @@ export const polishText = async (text: string): Promise<string> => {
 
     return response.text?.trim() || text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error('Gemini API Error:', error);
     throw error;
   }
 };
 
 export const continueThought = async (text: string): Promise<string> => {
-  if (!text) return "";
+  if (!text) return '';
   if (!apiKey) {
-      console.warn("API Key not found");
-      return "";
+    console.warn('API Key not found');
+    return '';
   }
 
   try {
@@ -46,9 +46,9 @@ export const continueThought = async (text: string): Promise<string> => {
       Input: ${text}`,
     });
 
-    return response.text?.trim() || "";
+    return response.text?.trim() || '';
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error('Gemini API Error:', error);
     throw error;
   }
 };
