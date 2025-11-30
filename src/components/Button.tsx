@@ -4,7 +4,7 @@ import React from 'react';
 import { colors, shadows, transitions, fonts, fontSize } from '../styles';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'icon';
+  variant?: 'primary' | 'secondary' | 'danger' | 'icon';
   loading?: boolean;
 }
 
@@ -53,6 +53,21 @@ const variantStyles = {
 
     &:hover:not(:disabled) {
       background-color: #f5f5f5;
+    }
+  `,
+  danger: css`
+    background-color: ${colors.accent};
+    color: ${colors.white};
+    border: 2px solid ${colors.ink};
+    box-shadow: ${shadows.retro};
+    padding: 0.5rem 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: ${fontSize.base};
+    font-weight: 700;
+
+    &:hover:not(:disabled) {
+      background-color: ${colors.accentDark};
     }
   `,
   icon: css`

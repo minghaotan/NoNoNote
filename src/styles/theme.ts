@@ -8,6 +8,7 @@ export const colors = {
   ink: '#1a1a1a',
   inkLight: '#4a4a4a',
   accent: '#ff5252',
+  accentDark: '#e64545',
   white: '#ffffff',
   transparent: 'transparent',
 } as const;

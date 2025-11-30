@@ -113,16 +113,6 @@ const buttonStyles = css`
   flex: 1;
 `;
 
-const deleteButtonStyles = css`
-  flex: 1;
-  background-color: ${colors.accent} !important;
-  color: ${colors.white} !important;
-
-  &:hover:not(:disabled) {
-    background-color: #e64545 !important;
-  }
-`;
-
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null;
 
@@ -140,7 +130,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose, onC
           <Button variant="secondary" onClick={onClose} css={buttonStyles}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={onConfirm} css={deleteButtonStyles}>
+          <Button variant="danger" onClick={onConfirm} css={buttonStyles}>
             Delete
           </Button>
         </div>
