@@ -9,7 +9,6 @@ interface NoteCardProps {
 
 export const NoteCard: React.FC<NoteCardProps> = ({ note, onClick, onDelete }) => {
   const handleDelete = (e: React.MouseEvent) => {
-    // Critical: Stop propagation immediately to prevent opening the editor
     e.preventDefault();
     e.stopPropagation();
     onDelete(e, note.id);
@@ -28,13 +27,9 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onClick, onDelete }) =
   };
 
   return (
-    <div
-      onClick={() => onClick(note)}
-      className="group relative bg-white border-2 border-ink p-4 shadow-retro transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px] active:shadow-retro-sm cursor-pointer min-h-[90px] flex flex-col"
-    >
-      {/* Delete Button - Absolute positioning with high z-index and explicit event blocking */}
+    <div onClick={() => onClick(note)} className="card card-interactive min-h-[90px] flex flex-col">
       <button
-        className="absolute top-1 right-1 z-30 p-1.5 text-ink/20 hover:text-accent hover:bg-ink/5 transition-colors"
+        className="card-delete-btn"
         onMouseDown={(e) => e.stopPropagation()}
         onClick={handleDelete}
         title="Delete"
@@ -55,18 +50,14 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onClick, onDelete }) =
         </svg>
       </button>
 
-      {/* Content - Plain Text */}
-      <div className="flex-1 pr-6 pt-0.5">
-        <p className="font-mono text-sm text-ink leading-relaxed line-clamp-6 whitespace-pre-wrap break-words">
-          {note.content ? note.content : <span className="opacity-30 italic">...</span>}
+      <div className="card-content">
+        <p className="note-text">
+          {note.content ? note.content : <span className="placeholder-text">...</span>}
         </p>
       </div>
 
-      {/* Footer - Minimal Compact Date */}
-      <div className="mt-2 flex justify-end pt-1">
-        <span className="font-mono text-[9px] text-ink/30 tracking-widest uppercase">
-          {formatDate(note.createdAt)}
-        </span>
+      <div className="card-footer">
+        <span className="card-date">{formatDate(note.createdAt)}</span>
       </div>
     </div>
   );

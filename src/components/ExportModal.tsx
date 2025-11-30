@@ -9,11 +9,9 @@ interface ExportModalProps {
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, notes }) => {
-  // Initialize with all notes selected - recalculate when notes change
   const allNoteIds = useMemo(() => new Set(notes.map((n) => n.id)), [notes]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
 
-  // Sync selectedIds when notes change (select all new notes)
   const [prevNoteIds, setPrevNoteIds] = useState<Set<string>>(() => new Set());
   if (isOpen && allNoteIds !== prevNoteIds) {
     setSelectedIds(new Set(allNoteIds));
@@ -67,24 +65,21 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, notes
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/30 backdrop-blur-sm"
-      onClick={onClose}
-    >
+    <div className="modal-backdrop z-50" onClick={onClose}>
       <div
-        className="bg-paper border-2 border-ink shadow-retro flex flex-col max-h-[85vh] w-full max-w-lg paper-texture"
+        className="modal-container flex flex-col max-h-[85vh] w-full max-w-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-5 border-b-2 border-ink bg-white">
-          <h2 className="font-mono text-xl font-bold text-ink mb-1 flex items-center gap-2">
-            <span className="w-2 h-6 bg-accent"></span>
+        <div className="modal-header">
+          <h2 className="modal-title-bar">
+            <span className="modal-accent-bar"></span>
             EXPORT DATA
           </h2>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 bg-paper">
+        <div className="modal-body">
           <div className="flex justify-between items-center mb-4">
-            <span className="font-mono text-xs font-bold text-ink/50 uppercase">Select Notes</span>
+            <span className="label">Select Notes</span>
             <button
               onClick={toggleAll}
               className="text-xs font-mono text-ink border border-ink px-2 py-1 hover:bg-white"
@@ -97,47 +92,43 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, notes
             <p className="text-center font-mono text-sm opacity-50 py-4">No notes available.</p>
           ) : (
             <div className="space-y-2">
-              {notes.map((note) => (
-                <div
-                  key={note.id}
-                  onClick={() => toggleNote(note.id)}
-                  className={`flex items-start gap-3 p-3 border-2 cursor-pointer transition-all ${selectedIds.has(note.id) ? 'bg-white border-ink shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] translate-x-[-2px] translate-y-[-2px]' : 'bg-transparent border-ink/20 hover:border-ink/50'}`}
-                >
-                  <div
-                    className={`w-4 h-4 mt-1 border-2 border-ink flex items-center justify-center ${selectedIds.has(note.id) ? 'bg-accent' : 'bg-transparent'}`}
-                  >
-                    {selectedIds.has(note.id) && (
-                      <span className="text-white text-[10px] font-bold">✓</span>
-                    )}
+              {notes.map((note) => {
+                const isSelected = selectedIds.has(note.id);
+                const itemClass = isSelected
+                  ? 'list-item list-item-selected'
+                  : 'list-item list-item-default';
+                const checkboxClass = isSelected ? 'checkbox checkbox-checked' : 'checkbox';
+
+                return (
+                  <div key={note.id} onClick={() => toggleNote(note.id)} className={itemClass}>
+                    <div className={checkboxClass}>
+                      {isSelected && <span className="checkbox-mark">✓</span>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-mono text-xs text-ink truncate font-bold">
+                        {note.content.split('\n')[0] || 'Untitled'}
+                      </p>
+                      <p className="text-[10px] text-ink/60 truncate font-mono mt-1">
+                        {new Date(note.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-mono text-xs text-ink truncate font-bold">
-                      {note.content.split('\n')[0] || 'Untitled'}
-                    </p>
-                    <p className="text-[10px] text-ink/60 truncate font-mono mt-1">
-                      {new Date(note.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
           {selectedIds.size > 0 && (
             <div className="mt-6">
-              <span className="font-mono text-xs font-bold text-ink/50 uppercase block mb-2">
-                Preview
-              </span>
-              <div className="bg-white border-2 border-ink p-2 max-h-32 overflow-auto">
-                <pre className="font-mono text-[10px] text-ink whitespace-pre-wrap break-all">
-                  {JSON.stringify(selectedNotes, null, 2)}
-                </pre>
+              <span className="label block mb-2">Preview</span>
+              <div className="preview-box">
+                <pre className="preview-text">{JSON.stringify(selectedNotes, null, 2)}</pre>
               </div>
             </div>
           )}
         </div>
 
-        <div className="p-5 border-t-2 border-ink bg-white flex gap-3">
+        <div className="modal-footer">
           <Button
             variant="primary"
             onClick={handleDownload}

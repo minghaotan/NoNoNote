@@ -32,10 +32,8 @@ export const EditorOverlay: React.FC<EditorOverlayProps> = ({
     }
   }, [isOpen, initialNote]);
 
-  // Auto-focus on open
   useEffect(() => {
     if (isOpen && textareaRef.current) {
-      // Small timeout to allow animation to settle
       setTimeout(() => {
         textareaRef.current?.focus();
       }, 300);
@@ -48,7 +46,6 @@ export const EditorOverlay: React.FC<EditorOverlayProps> = ({
       return;
     }
 
-    // Auto-generate title internally for data structure
     const lines = content.trim().split('\n');
     const generatedTitle = (lines[0] ?? '').substring(0, 60).trim();
 
@@ -85,18 +82,14 @@ export const EditorOverlay: React.FC<EditorOverlayProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-paper flex flex-col paper-texture animate-in slide-in-from-bottom duration-300">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between p-4 border-b-2 border-ink bg-paper z-10 shadow-sm">
-        <button
-          onClick={onClose}
-          className="text-ink hover:text-accent font-mono text-sm font-bold uppercase tracking-widest px-2"
-        >
+    <div className="overlay-fullscreen animate-slide-up">
+      <div className="overlay-toolbar">
+        <button onClick={onClose} className="btn-text text-ink hover:text-accent px-2">
           Close
         </button>
 
         <div className="flex items-center gap-4">
-          <span className="font-mono text-xs font-bold text-ink/40 uppercase tracking-widest hidden sm:inline-block">
+          <span className="toolbar-label hidden sm:inline-block">
             {initialNote ? 'Editing' : 'New Note'}
           </span>
         </div>
@@ -109,19 +102,17 @@ export const EditorOverlay: React.FC<EditorOverlayProps> = ({
         </button>
       </div>
 
-      {/* Editor Area */}
       <div className="flex-1 overflow-hidden relative w-full flex flex-col">
         <textarea
           ref={textareaRef}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="flex-1 w-full h-full p-6 resize-none bg-transparent font-mono text-lg text-ink focus:outline-none leading-relaxed placeholder:text-ink/20"
+          className="editor-textarea"
           placeholder="Type your story here..."
           spellCheck={false}
         />
       </div>
 
-      {/* AI Tools Bar - Only shown if enabled */}
       {enableAI && (
         <div className="p-4 border-t-2 border-ink bg-white pb-8 safe-area-bottom z-20">
           <div className="flex gap-3 justify-center max-w-md mx-auto overflow-x-auto">

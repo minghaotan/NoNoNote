@@ -24,17 +24,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     });
   };
 
+  const checkboxClass = settings.enableAI
+    ? 'checkbox checkbox-large checkbox-checked'
+    : 'checkbox checkbox-large bg-white';
+
   return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-ink/20 backdrop-blur-sm animate-in fade-in duration-200"
-      onClick={onClose}
-    >
+    <div className="modal-backdrop z-[60] animate-fade-in" onClick={onClose}>
       <div
-        className="bg-paper border-2 border-ink shadow-retro p-6 w-full max-w-sm paper-texture animate-in zoom-in-95 duration-200"
+        className="modal-container animate-zoom-in p-6 w-full max-w-sm"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-2 mb-6 border-b-2 border-ink pb-4">
-          <span className="w-6 h-6 flex items-center justify-center border-2 border-ink bg-ink text-white rounded-full">
+        <div className="flex items-center gap-2 mb-6 section-border">
+          <span className="settings-icon">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="14"
@@ -56,11 +57,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         <div className="space-y-6">
-          {/* AI Toggle */}
           <div className="flex items-start gap-4 cursor-pointer group" onClick={toggleAI}>
-            <div
-              className={`mt-1 w-6 h-6 border-2 border-ink flex items-center justify-center transition-colors shadow-[2px_2px_0px_0px_rgba(26,26,26,0.3)] ${settings.enableAI ? 'bg-accent' : 'bg-white'}`}
-            >
+            <div className={`mt-1 ${checkboxClass}`}>
               {settings.enableAI && (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -88,11 +86,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          {/* Version Info */}
-          <div className="pt-6 border-t-2 border-ink/10 text-center">
-            <p className="font-mono text-[10px] text-ink/40 uppercase tracking-widest">
-              Typewriter Notes v1.0
-            </p>
+          <div className="pt-6 divider text-center">
+            <p className="version-text">Typewriter Notes v1.0</p>
           </div>
         </div>
 

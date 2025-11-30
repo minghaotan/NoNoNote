@@ -11,21 +11,14 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose, onC
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-ink/20 backdrop-blur-sm animate-in fade-in duration-200"
-      onClick={onClose}
-    >
+    <div className="modal-backdrop z-[60] animate-fade-in" onClick={onClose}>
       <div
-        className="bg-paper border-2 border-ink shadow-retro p-6 w-full max-w-sm paper-texture animate-in zoom-in-95 duration-200"
+        className="modal-container animate-zoom-in p-6 w-full max-w-sm"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-12 h-12 mb-4 border-2 border-ink flex items-center justify-center bg-accent text-white font-mono font-bold text-2xl shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]">
-            !
-          </div>
-          <h3 className="font-mono text-xl font-bold text-ink mb-2 uppercase tracking-widest">
-            Confirm Delete
-          </h3>
+          <div className="alert-icon mb-4">!</div>
+          <h3 className="modal-title mb-2">Confirm Delete</h3>
           <p className="font-mono text-ink text-sm leading-relaxed">
             Are you sure you want to discard this note?
           </p>
@@ -38,11 +31,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose, onC
           <Button variant="secondary" onClick={onClose} className="flex-1">
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            onClick={onConfirm}
-            className="flex-1 !bg-accent !text-white hover:!bg-red-600"
-          >
+          <Button variant="primary" onClick={onConfirm} className="flex-1 btn-danger">
             Delete
           </Button>
         </div>

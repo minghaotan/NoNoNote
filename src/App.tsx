@@ -11,7 +11,6 @@ import { Note, AppSettings } from './types';
 import { getNotes, saveNotes, generateId, getSettings, saveSettings } from './services/storage';
 
 const App: React.FC = () => {
-  // Initialize state lazily to ensure it runs once and doesn't cause hydration/effect loops
   const [notes, setNotes] = useState<Note[]>(() => getNotes());
   const [settings, setSettings] = useState<AppSettings>(() => getSettings());
 
@@ -22,7 +21,6 @@ const App: React.FC = () => {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Date Range State
   const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>({
     start: null,
     end: null,
@@ -30,12 +28,10 @@ const App: React.FC = () => {
 
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
 
-  // Persist notes whenever they change
   useEffect(() => {
     saveNotes(notes);
   }, [notes]);
 
-  // Persist settings
   useEffect(() => {
     saveSettings(settings);
   }, [settings]);
@@ -51,7 +47,6 @@ const App: React.FC = () => {
   };
 
   const requestDeleteNote = (e: React.MouseEvent, id: string) => {
-    // Stop propagation is handled in NoteCard, but good to have here too just in case
     e.stopPropagation();
     setDeletingNoteId(id);
   };
@@ -67,12 +62,10 @@ const App: React.FC = () => {
     const timestamp = Date.now();
 
     if (id) {
-      // Update existing
       setNotes((prev) =>
         prev.map((n) => (n.id === id ? { ...n, title, content, updatedAt: timestamp } : n))
       );
     } else {
-      // Create new
       const newNote: Note = {
         id: generateId(),
         title,
@@ -84,7 +77,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Logic for active dates in calendar
   const activeDates = useMemo(() => {
     const dates = new Set<string>();
     notes.forEach((note) => {
@@ -101,7 +93,6 @@ const App: React.FC = () => {
     return dates;
   }, [notes]);
 
-  // Logic for filtering list by range
   const filteredNotes = useMemo(() => {
     if (!dateRange.start) return notes;
 
@@ -116,18 +107,16 @@ const App: React.FC = () => {
 
     return notes.filter((note) => {
       const noteDate = new Date(note.createdAt);
-      // If only start is selected, show everything after start
       if (!endFilter) {
         return noteDate >= startFilter;
       }
-      // If range, show within range
       return noteDate >= startFilter && noteDate <= endFilter;
     });
   }, [notes, dateRange]);
 
   return (
-    <div className="min-h-screen pb-24 bg-paper paper-texture font-mono relative flex flex-col">
-      <div className="max-w-2xl mx-auto min-h-screen w-full flex flex-col">
+    <div className="app-container">
+      <div className="content-container">
         <Header
           onToggleCalendar={() => setIsCalendarOpen(true)}
           isCalendarOpen={isCalendarOpen}
@@ -144,10 +133,10 @@ const App: React.FC = () => {
           activeDates={activeDates}
         />
 
-        <main className="flex-1 p-6">
+        <main className="main-content">
           {filteredNotes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 opacity-50 text-center">
-              <div className="w-12 h-12 border-2 border-ink border-dashed rounded-full flex items-center justify-center mb-4">
+            <div className="empty-state">
+              <div className="empty-state-icon">
                 <span className="text-2xl font-mono italic">{dateRange.start ? '0' : '?'}</span>
               </div>
               <p className="font-mono text-ink text-sm">
@@ -157,20 +146,20 @@ const App: React.FC = () => {
           ) : (
             <>
               {dateRange.start && (
-                <div className="mb-4 pb-2 border-b-2 border-dashed border-ink/20 flex justify-between items-center animate-in fade-in slide-in-from-top-2">
-                  <span className="font-mono text-xs text-ink/50 uppercase font-bold">
+                <div className="filter-bar animate-slide-down">
+                  <span className="filter-label">
                     Range: {dateRange.start.toLocaleDateString()}
                     {dateRange.end ? ` — ${dateRange.end.toLocaleDateString()}` : ' +'}
                   </span>
                   <button
                     onClick={() => setDateRange({ start: null, end: null })}
-                    className="text-[10px] text-accent hover:underline font-bold tracking-widest uppercase"
+                    className="filter-clear-btn"
                   >
                     CLEAR
                   </button>
                 </div>
               )}
-              <div className="grid grid-cols-1 gap-3">
+              <div className="note-grid">
                 {filteredNotes.map((note) => (
                   <NoteCard
                     key={note.id}
@@ -185,9 +174,8 @@ const App: React.FC = () => {
         </main>
       </div>
 
-      {/* Sticky Bottom Action */}
-      <div className="fixed bottom-8 left-0 right-0 flex justify-center z-30 pointer-events-none">
-        <div className="pointer-events-auto">
+      <div className="fab-container">
+        <div className="fab-wrapper">
           <Button
             variant="icon"
             onClick={handleCreateNote}

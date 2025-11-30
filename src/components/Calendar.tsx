@@ -10,7 +10,7 @@ interface CalendarProps {
   onClose: () => void;
   dateRange: DateRange;
   onChangeRange: (range: DateRange) => void;
-  activeDates: Set<string>; // 'YYYY-MM-DD'
+  activeDates: Set<string>;
 }
 
 export const Calendar: React.FC<CalendarProps> = ({
@@ -21,7 +21,6 @@ export const Calendar: React.FC<CalendarProps> = ({
   activeDates,
 }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  // Get today's date for highlighting
   const today = new Date();
 
   if (!isOpen) return null;
@@ -55,13 +54,6 @@ export const Calendar: React.FC<CalendarProps> = ({
   const handleDateClick = (day: number) => {
     const clickedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
 
-    // Logic:
-    // 1. If no start, set start.
-    // 2. If start exists but no end:
-    //    a. If clicked < start, set as new start.
-    //    b. If clicked >= start, set as end.
-    // 3. If both exist, reset and set as new start.
-
     let newRange: DateRange = { ...dateRange };
 
     if (!dateRange.start || (dateRange.start && dateRange.end)) {
@@ -82,57 +74,67 @@ export const Calendar: React.FC<CalendarProps> = ({
     onClose();
   };
 
+  const getCalendarDayClass = (
+    isStart: boolean,
+    isEnd: boolean,
+    isInRange: boolean,
+    hasNote: boolean,
+    isTodayDate: boolean
+  ) => {
+    let className = 'calendar-day ';
+
+    if (isStart || isEnd) {
+      className += 'calendar-day-selected';
+    } else if (isInRange) {
+      className += 'calendar-day-in-range';
+    } else {
+      className += 'calendar-day-default';
+
+      if (hasNote) {
+        className += ' calendar-day-has-note';
+      }
+
+      if (isTodayDate) {
+        className += ' calendar-day-today';
+      }
+    }
+
+    return className;
+  };
+
   const renderCalendarDays = () => {
     const daysInMonth = getDaysInMonth(currentMonth);
     const firstDay = getFirstDayOfMonth(currentMonth);
     const days = [];
 
-    // Empty cells
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className="h-9 w-9"></div>);
     }
 
-    // Days
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
       const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
       const hasNote = activeDates.has(dateStr);
       const isTodayDate = isSameDay(date, today);
 
-      // Range status
-      const isStart = dateRange.start && isSameDay(date, dateRange.start);
-      const isEnd = dateRange.end && isSameDay(date, dateRange.end);
-      const isInRange =
-        dateRange.start && dateRange.end && date > dateRange.start && date < dateRange.end;
+      const isStart = dateRange.start ? isSameDay(date, dateRange.start) : false;
+      const isEnd = dateRange.end ? isSameDay(date, dateRange.end) : false;
+      const isInRange = !!(
+        dateRange.start &&
+        dateRange.end &&
+        date > dateRange.start &&
+        date < dateRange.end
+      );
 
-      let buttonClass = `h-9 w-9 flex items-center justify-center font-mono text-xs transition-all relative z-10 rounded-sm `;
-
-      if (isStart || isEnd) {
-        buttonClass += `bg-ink text-white font-bold shadow-[2px_2px_0px_0px_rgba(26,26,26,0.3)] `;
-      } else if (isInRange) {
-        buttonClass += `bg-ink/10 text-ink font-bold `;
-      } else {
-        // Default
-        buttonClass += `text-ink hover:bg-ink/5 `;
-
-        if (hasNote) {
-          buttonClass += `font-bold underline decoration-2 decoration-accent/50 `;
-        }
-
-        // Today Highlight
-        if (isTodayDate) {
-          buttonClass += `border-2 border-dashed border-ink `;
-        }
-      }
+      const buttonClass = getCalendarDayClass(isStart, isEnd, isInRange, hasNote, isTodayDate);
 
       days.push(
         <div key={day} className="relative p-0.5">
-          {/* Visual connector for range */}
           {(isInRange || isStart) && dateRange.end && !isEnd && (
-            <div className="absolute top-1/2 right-0 w-1/2 h-1 bg-ink/10 -translate-y-1/2 z-0"></div>
+            <div className="calendar-range-connector right-0"></div>
           )}
           {(isInRange || isEnd) && dateRange.start && !isStart && (
-            <div className="absolute top-1/2 left-0 w-1/2 h-1 bg-ink/10 -translate-y-1/2 z-0"></div>
+            <div className="calendar-range-connector left-0"></div>
           )}
 
           <button onClick={() => handleDateClick(day)} className={buttonClass}>
@@ -146,19 +148,13 @@ export const Calendar: React.FC<CalendarProps> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-ink/20 backdrop-blur-sm"
-      onClick={onClose}
-    >
+    <div className="modal-backdrop z-40" onClick={onClose}>
       <div
-        className="bg-paper border-2 border-ink shadow-retro p-6 w-full max-w-sm paper-texture animate-in zoom-in-95 duration-200"
+        className="modal-container animate-zoom-in p-6 w-full max-w-sm"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-4 px-1 border-b-2 border-ink pb-2">
-          <button
-            onClick={handlePrevMonth}
-            className="p-1 hover:bg-ink/5 text-ink font-mono font-bold text-sm"
-          >
+        <div className="flex justify-between items-center mb-4 px-1 section-border">
+          <button onClick={handlePrevMonth} className="calendar-nav-btn">
             &lt;
           </button>
           <div className="text-center">
@@ -168,17 +164,14 @@ export const Calendar: React.FC<CalendarProps> = ({
                 .toUpperCase()}
             </span>
           </div>
-          <button
-            onClick={handleNextMonth}
-            className="p-1 hover:bg-ink/5 text-ink font-mono font-bold text-sm"
-          >
+          <button onClick={handleNextMonth} className="calendar-nav-btn">
             &gt;
           </button>
         </div>
 
         <div className="grid grid-cols-7 gap-1 text-center mb-1">
-          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
-            <div key={d} className="font-mono text-[10px] font-bold text-ink/40">
+          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, index) => (
+            <div key={`${d}-${index}`} className="font-mono text-[10px] font-bold text-ink/40">
               {d}
             </div>
           ))}
@@ -198,11 +191,8 @@ export const Calendar: React.FC<CalendarProps> = ({
           </span>
         </div>
 
-        <div className="flex justify-between items-center pt-2 border-t-2 border-ink/10">
-          <button
-            onClick={handleClear}
-            className="text-xs font-mono text-ink/60 hover:text-accent uppercase font-bold py-2"
-          >
+        <div className="flex justify-between items-center pt-2 divider">
+          <button onClick={handleClear} className="btn-text text-ink/60 py-2 text-xs">
             Clear Filter
           </button>
           <button

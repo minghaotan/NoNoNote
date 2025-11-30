@@ -13,25 +13,15 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  // Styles based on STYLES constant
-  // shadow: shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]
-  // shadowActive: active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]
-
-  const baseStyles =
-    'transition-all duration-100 font-mono active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] disabled:opacity-50 disabled:cursor-not-allowed';
-
   const variants = {
-    primary:
-      'bg-ink text-white border-2 border-ink shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-ink-light px-6 py-2 uppercase tracking-widest text-sm font-bold',
-    secondary:
-      'bg-white text-ink border-2 border-ink shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-gray-50 px-6 py-2 uppercase tracking-widest text-sm font-bold',
-    // Changed from bg-accent to bg-ink for neutral primary action
-    icon: 'p-3 rounded-full bg-ink text-white border-2 border-ink shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] flex items-center justify-center hover:bg-ink-light',
+    primary: 'btn-primary',
+    secondary: 'btn-secondary',
+    icon: 'btn-icon',
   };
 
   return (
     <button
-      className={`${baseStyles} ${variants[variant]} ${className}`}
+      className={`${variants[variant]} ${className}`}
       disabled={disabled || loading}
       {...props}
     >

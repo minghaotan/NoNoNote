@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
 body {
   background-color: #f2f0e9;
   color: #1a1a1a;
@@ -31,6 +35,435 @@ body {
   border-radius: 0;
 }
 
+/* Paper texture background */
 .paper-texture {
   background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* ============================================
+   COMPONENT LAYER - Reusable UI Components
+   ============================================ */
+
+@layer components {
+  /* --------------------------------------------
+     BUTTONS
+     -------------------------------------------- */
+
+  /* Base button styles shared by all variants */
+  .btn-base {
+    @apply transition-all duration-100 font-mono disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Retro shadow effect for buttons */
+  .btn-retro-shadow {
+    @apply shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)];
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply btn-base btn-retro-shadow bg-ink text-white border-2 border-ink hover:bg-ink-light px-6 py-2 uppercase tracking-widest text-sm font-bold;
+  }
+
+  /* Secondary button */
+  .btn-secondary {
+    @apply btn-base btn-retro-shadow bg-white text-ink border-2 border-ink hover:bg-gray-50 px-6 py-2 uppercase tracking-widest text-sm font-bold;
+  }
+
+  /* Icon button (circular) */
+  .btn-icon {
+    @apply btn-base btn-retro-shadow p-3 rounded-full bg-ink text-white border-2 border-ink flex items-center justify-center hover:bg-ink-light;
+  }
+
+  /* Danger button modifier */
+  .btn-danger {
+    @apply !bg-accent !text-white hover:!bg-red-600;
+  }
+
+  /* Text button (minimal styling) */
+  .btn-text {
+    @apply font-mono text-sm font-bold uppercase tracking-widest hover:text-accent transition-colors;
+  }
+
+  /* Header icon button */
+  .btn-header-icon {
+    @apply w-9 h-9 flex items-center justify-center rounded-full text-ink hover:bg-ink/10 transition-all duration-200;
+  }
+
+  .btn-header-icon-active {
+    @apply bg-ink text-white;
+  }
+
+  /* --------------------------------------------
+     CARDS
+     -------------------------------------------- */
+
+  /* Note card container */
+  .card {
+    @apply relative bg-white border-2 border-ink p-4 shadow-retro transition-all duration-150 cursor-pointer;
+  }
+
+  .card-interactive {
+    @apply active:translate-x-[2px] active:translate-y-[2px] active:shadow-retro-sm;
+  }
+
+  /* Card delete button */
+  .card-delete-btn {
+    @apply absolute top-1 right-1 z-30 p-1.5 text-ink/20 hover:text-accent hover:bg-ink/5 transition-colors;
+  }
+
+  /* Card content area */
+  .card-content {
+    @apply flex-1 pr-6 pt-0.5;
+  }
+
+  /* Card footer */
+  .card-footer {
+    @apply mt-2 flex justify-end pt-1;
+  }
+
+  /* Card date label */
+  .card-date {
+    @apply font-mono text-[9px] text-ink/30 tracking-widest uppercase;
+  }
+
+  /* --------------------------------------------
+     MODALS
+     -------------------------------------------- */
+
+  /* Modal overlay backdrop */
+  .modal-backdrop {
+    @apply fixed inset-0 flex items-center justify-center p-4 bg-ink/20 backdrop-blur-sm;
+  }
+
+  /* Modal container */
+  .modal-container {
+    @apply bg-paper border-2 border-ink shadow-retro paper-texture;
+  }
+
+  /* Modal header section */
+  .modal-header {
+    @apply p-5 border-b-2 border-ink bg-white;
+  }
+
+  /* Modal title */
+  .modal-title {
+    @apply font-mono text-xl font-bold text-ink uppercase tracking-widest;
+  }
+
+  /* Modal title with accent bar */
+  .modal-title-bar {
+    @apply flex items-center gap-2;
+  }
+
+  .modal-accent-bar {
+    @apply w-2 h-6 bg-accent;
+  }
+
+  /* Modal body/content section */
+  .modal-body {
+    @apply flex-1 overflow-y-auto p-5 bg-paper;
+  }
+
+  /* Modal footer section */
+  .modal-footer {
+    @apply p-5 border-t-2 border-ink bg-white flex gap-3;
+  }
+
+  /* Full screen overlay (like editor) */
+  .overlay-fullscreen {
+    @apply fixed inset-0 z-50 bg-paper flex flex-col paper-texture;
+  }
+
+  /* Overlay toolbar */
+  .overlay-toolbar {
+    @apply flex items-center justify-between p-4 border-b-2 border-ink bg-paper z-10 shadow-sm;
+  }
+
+  /* --------------------------------------------
+     FORM ELEMENTS
+     -------------------------------------------- */
+
+  /* Textarea for editor */
+  .editor-textarea {
+    @apply flex-1 w-full h-full p-6 resize-none bg-transparent font-mono text-lg text-ink focus:outline-none leading-relaxed placeholder:text-ink/20;
+  }
+
+  /* Checkbox container */
+  .checkbox {
+    @apply w-4 h-4 border-2 border-ink flex items-center justify-center transition-colors;
+  }
+
+  .checkbox-checked {
+    @apply bg-accent;
+  }
+
+  .checkbox-large {
+    @apply w-6 h-6 shadow-[2px_2px_0px_0px_rgba(26,26,26,0.3)];
+  }
+
+  /* Checkbox checkmark */
+  .checkbox-mark {
+    @apply text-white text-[10px] font-bold;
+  }
+
+  /* --------------------------------------------
+     CALENDAR
+     -------------------------------------------- */
+
+  /* Calendar navigation button */
+  .calendar-nav-btn {
+    @apply p-1 hover:bg-ink/5 text-ink font-mono font-bold text-sm;
+  }
+
+  /* Calendar day button base */
+  .calendar-day {
+    @apply h-9 w-9 flex items-center justify-center font-mono text-xs transition-all relative z-10 rounded-sm;
+  }
+
+  /* Calendar day states */
+  .calendar-day-default {
+    @apply text-ink hover:bg-ink/5;
+  }
+
+  .calendar-day-selected {
+    @apply bg-ink text-white font-bold shadow-[2px_2px_0px_0px_rgba(26,26,26,0.3)];
+  }
+
+  .calendar-day-in-range {
+    @apply bg-ink/10 text-ink font-bold;
+  }
+
+  .calendar-day-has-note {
+    @apply font-bold underline decoration-2 decoration-accent/50;
+  }
+
+  .calendar-day-today {
+    @apply border-2 border-dashed border-ink;
+  }
+
+  /* Calendar range connector */
+  .calendar-range-connector {
+    @apply absolute top-1/2 w-1/2 h-1 bg-ink/10 -translate-y-1/2 z-0;
+  }
+
+  /* --------------------------------------------
+     LAYOUT & CONTAINERS
+     -------------------------------------------- */
+
+  /* App container */
+  .app-container {
+    @apply min-h-screen pb-24 bg-paper paper-texture font-mono relative flex flex-col;
+  }
+
+  /* Content container */
+  .content-container {
+    @apply max-w-2xl mx-auto min-h-screen w-full flex flex-col;
+  }
+
+  /* Main content area */
+  .main-content {
+    @apply flex-1 p-6;
+  }
+
+  /* Header container */
+  .header {
+    @apply pt-6 pb-2 px-6 flex justify-between items-center bg-paper sticky top-0 z-20;
+  }
+
+  /* App title */
+  .app-title {
+    @apply font-mono text-xl font-bold text-ink tracking-tighter flex items-center gap-2;
+  }
+
+  /* Title accent dot */
+  .title-accent {
+    @apply w-2.5 h-2.5 bg-accent border border-ink inline-block shadow-[2px_2px_0px_0px_rgba(26,26,26,1)];
+  }
+
+  /* Floating action button container */
+  .fab-container {
+    @apply fixed bottom-8 left-0 right-0 flex justify-center z-30 pointer-events-none;
+  }
+
+  .fab-wrapper {
+    @apply pointer-events-auto;
+  }
+
+  /* Empty state container */
+  .empty-state {
+    @apply flex flex-col items-center justify-center h-64 opacity-50 text-center;
+  }
+
+  .empty-state-icon {
+    @apply w-12 h-12 border-2 border-ink border-dashed rounded-full flex items-center justify-center mb-4;
+  }
+
+  /* Filter indicator bar */
+  .filter-bar {
+    @apply mb-4 pb-2 border-b-2 border-dashed border-ink/20 flex justify-between items-center;
+  }
+
+  .filter-label {
+    @apply font-mono text-xs text-ink/50 uppercase font-bold;
+  }
+
+  .filter-clear-btn {
+    @apply text-[10px] text-accent hover:underline font-bold tracking-widest uppercase;
+  }
+
+  /* Note grid */
+  .note-grid {
+    @apply grid grid-cols-1 gap-3;
+  }
+
+  /* --------------------------------------------
+     TYPOGRAPHY
+     -------------------------------------------- */
+
+  /* Section label */
+  .label {
+    @apply font-mono text-xs font-bold text-ink/50 uppercase;
+  }
+
+  /* Note content text */
+  .note-text {
+    @apply font-mono text-sm text-ink leading-relaxed line-clamp-6 whitespace-pre-wrap break-words;
+  }
+
+  /* Placeholder text */
+  .placeholder-text {
+    @apply opacity-30 italic;
+  }
+
+  /* Toolbar label */
+  .toolbar-label {
+    @apply font-mono text-xs font-bold text-ink/40 uppercase tracking-widest;
+  }
+
+  /* Version text */
+  .version-text {
+    @apply font-mono text-[10px] text-ink/40 uppercase tracking-widest;
+  }
+
+  /* --------------------------------------------
+     ICONS & DECORATIVE
+     -------------------------------------------- */
+
+  /* Warning/alert icon box */
+  .alert-icon {
+    @apply w-12 h-12 border-2 border-ink flex items-center justify-center bg-accent text-white font-mono font-bold text-2xl shadow-[2px_2px_0px_0px_rgba(26,26,26,1)];
+  }
+
+  /* Settings icon circle */
+  .settings-icon {
+    @apply w-6 h-6 flex items-center justify-center border-2 border-ink bg-ink text-white rounded-full;
+  }
+
+  /* --------------------------------------------
+     LIST ITEMS
+     -------------------------------------------- */
+
+  /* Selectable list item */
+  .list-item {
+    @apply flex items-start gap-3 p-3 border-2 cursor-pointer transition-all;
+  }
+
+  .list-item-default {
+    @apply bg-transparent border-ink/20 hover:border-ink/50;
+  }
+
+  .list-item-selected {
+    @apply bg-white border-ink shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] translate-x-[-2px] translate-y-[-2px];
+  }
+
+  /* Preview box */
+  .preview-box {
+    @apply bg-white border-2 border-ink p-2 max-h-32 overflow-auto;
+  }
+
+  .preview-text {
+    @apply font-mono text-[10px] text-ink whitespace-pre-wrap break-all;
+  }
+
+  /* --------------------------------------------
+     DIVIDERS & BORDERS
+     -------------------------------------------- */
+
+  .divider {
+    @apply border-t-2 border-ink/10;
+  }
+
+  .divider-heavy {
+    @apply border-t-2 border-ink;
+  }
+
+  .section-border {
+    @apply border-b-2 border-ink pb-2;
+  }
+
+  /* --------------------------------------------
+     ANIMATIONS
+     -------------------------------------------- */
+}
+
+/* ============================================
+   CUSTOM ANIMATIONS (replacing tailwindcss-animate)
+   ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideInFromBottom 0.3s ease-out forwards;
+}
+
+.animate-slide-down {
+  animation: slideInFromTop 0.2s ease-out forwards;
+}
+
+.animate-zoom-in {
+  animation: zoomIn 0.2s ease-out forwards;
 }

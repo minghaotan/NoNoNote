@@ -15,18 +15,23 @@ export const Header: React.FC<HeaderProps> = ({
   isCalendarOpen,
   hasActiveFilter,
 }) => {
+  const calendarBtnClass =
+    isCalendarOpen || hasActiveFilter
+      ? 'btn-header-icon btn-header-icon-active'
+      : 'btn-header-icon';
+
   return (
-    <header className="pt-6 pb-2 px-6 flex justify-between items-center bg-paper sticky top-0 z-20">
+    <header className="header">
       <div>
-        <h1 className="font-mono text-xl font-bold text-ink tracking-tighter flex items-center gap-2">
-          <span className="w-2.5 h-2.5 bg-accent border border-ink inline-block shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]"></span>
+        <h1 className="app-title">
+          <span className="title-accent"></span>
           TypeNotes
         </h1>
       </div>
       <div className="flex gap-2">
         <button
           onClick={onToggleCalendar}
-          className={`w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 ${isCalendarOpen || hasActiveFilter ? 'bg-ink text-white' : 'text-ink hover:bg-ink/10'}`}
+          className={calendarBtnClass}
           title="Filter by Date Range"
         >
           <svg
@@ -46,12 +51,7 @@ export const Header: React.FC<HeaderProps> = ({
             <line x1="3" y1="10" x2="21" y2="10"></line>
           </svg>
         </button>
-        <button
-          onClick={onOpenExport}
-          className="w-9 h-9 flex items-center justify-center rounded-full text-ink hover:bg-ink/10 transition-all duration-200"
-          title="Backup Data"
-        >
-          {/* Changed to Export/Upload icon style */}
+        <button onClick={onOpenExport} className="btn-header-icon" title="Backup Data">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"
@@ -68,11 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
             <line x1="12" y1="2" x2="12" y2="15"></line>
           </svg>
         </button>
-        <button
-          onClick={onOpenSettings}
-          className="w-9 h-9 flex items-center justify-center rounded-full text-ink hover:bg-ink/10 transition-all duration-200"
-          title="Settings"
-        >
+        <button onClick={onOpenSettings} className="btn-header-icon" title="Settings">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"
