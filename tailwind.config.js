@@ -8,21 +8,14 @@ export default {
     extend: {
       fontFamily: {
         mono: [
-          'SF Mono',
-          'Menlo',
-          'Monaco',
-          'Consolas',
-          'Courier New',
+          '"Courier Prime"',
+          'Courier',
           'monospace'
         ],
         sans: [
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'Segoe UI',
-          'Roboto',
-          'Helvetica Neue',
-          'Arial',
-          'sans-serif'
+          '"Courier Prime"',
+          'Courier',
+          'monospace'
         ],
       },
       colors: {
