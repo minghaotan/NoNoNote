@@ -1,57 +1,123 @@
+/** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
 import React from 'react';
+import { colors, shadows, transitions, fonts, fontSize } from '../styles';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'icon';
   loading?: boolean;
 }
 
+const baseStyles = css`
+  font-family: ${fonts.mono};
+  transition: ${transitions.fast};
+  cursor: pointer;
+
+  &:active {
+    transform: translate(2px, 2px);
+    box-shadow: ${shadows.retroActive};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const variantStyles = {
+  primary: css`
+    background-color: ${colors.ink};
+    color: ${colors.white};
+    border: 2px solid ${colors.ink};
+    box-shadow: ${shadows.retro};
+    padding: 0.5rem 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: ${fontSize.base};
+    font-weight: 700;
+
+    &:hover:not(:disabled) {
+      background-color: ${colors.inkLight};
+    }
+  `,
+  secondary: css`
+    background-color: ${colors.white};
+    color: ${colors.ink};
+    border: 2px solid ${colors.ink};
+    box-shadow: ${shadows.retro};
+    padding: 0.5rem 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: ${fontSize.base};
+    font-weight: 700;
+
+    &:hover:not(:disabled) {
+      background-color: #f5f5f5;
+    }
+  `,
+  icon: css`
+    padding: 0.75rem;
+    border-radius: 9999px;
+    background-color: ${colors.ink};
+    color: ${colors.white};
+    border: 2px solid ${colors.ink};
+    box-shadow: ${shadows.retro};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover:not(:disabled) {
+      background-color: ${colors.inkLight};
+    }
+  `,
+};
+
+const loadingContainerStyles = css`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const spinnerStyles = css`
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  animation: spin 1s linear infinite;
+  width: 1rem;
+  height: 1rem;
+`;
+
 export const Button: React.FC<ButtonProps> = ({
   children,
   variant = 'primary',
   loading,
-  className = '',
   disabled,
   ...props
 }) => {
-  // Styles based on STYLES constant
-  // shadow: shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]
-  // shadowActive: active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]
-
-  const baseStyles =
-    'transition-all duration-100 font-mono active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] disabled:opacity-50 disabled:cursor-not-allowed';
-
-  const variants = {
-    primary:
-      'bg-ink text-white border-2 border-ink shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-ink-light px-6 py-2 uppercase tracking-widest text-sm font-bold',
-    secondary:
-      'bg-white text-ink border-2 border-ink shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:bg-gray-50 px-6 py-2 uppercase tracking-widest text-sm font-bold',
-    // Changed from bg-accent to bg-ink for neutral primary action
-    icon: 'p-3 rounded-full bg-ink text-white border-2 border-ink shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] flex items-center justify-center hover:bg-ink-light',
-  };
-
   return (
-    <button
-      className={`${baseStyles} ${variants[variant]} ${className}`}
-      disabled={disabled || loading}
-      {...props}
-    >
+    <button css={[baseStyles, variantStyles[variant]]} disabled={disabled || loading} {...props}>
       {loading ? (
-        <span className="flex items-center gap-2">
-          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+        <span css={loadingContainerStyles}>
+          <svg css={spinnerStyles} viewBox="0 0 24 24">
             <circle
-              className="opacity-25"
+              style={{ opacity: 0.25 }}
               cx="12"
               cy="12"
               r="10"
               stroke="currentColor"
               strokeWidth="4"
               fill="none"
-            ></circle>
+            />
             <path
-              className="opacity-75"
+              style={{ opacity: 0.75 }}
               fill="currentColor"
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
+            />
           </svg>
           ...
         </span>

@@ -1,6 +1,9 @@
+/** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
 import React, { useState, useMemo, useCallback } from 'react';
 import { Button } from './Button';
 import { Note } from '../types';
+import { colors, shadows, transitions, fonts, fontSize, zIndex, mixins } from '../styles';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -8,12 +11,219 @@ interface ExportModalProps {
   notes: Note[];
 }
 
+const overlayStyles = css`
+  position: fixed;
+  inset: 0;
+  z-index: ${zIndex.overlay};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(26, 26, 26, 0.3);
+  backdrop-filter: blur(4px);
+`;
+
+const containerStyles = css`
+  background-color: ${colors.paper};
+  border: 2px solid ${colors.ink};
+  box-shadow: ${shadows.retro};
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  width: 100%;
+  max-width: 32rem;
+  ${mixins.paperTexture}
+`;
+
+const headerStyles = css`
+  padding: 1.25rem;
+  border-bottom: 2px solid ${colors.ink};
+  background-color: ${colors.white};
+`;
+
+const titleStyles = css`
+  font-family: ${fonts.mono};
+  font-size: ${fontSize.xl};
+  font-weight: 700;
+  color: ${colors.ink};
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const titleAccentStyles = css`
+  width: 0.5rem;
+  height: 1.5rem;
+  background-color: ${colors.accent};
+`;
+
+const contentStyles = css`
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+  background-color: ${colors.paper};
+`;
+
+const selectHeaderStyles = css`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+`;
+
+const selectLabelStyles = css`
+  font-family: ${fonts.mono};
+  font-size: ${fontSize.sm};
+  font-weight: 700;
+  color: rgba(26, 26, 26, 0.5);
+  text-transform: uppercase;
+`;
+
+const toggleButtonStyles = css`
+  font-size: ${fontSize.sm};
+  font-family: ${fonts.mono};
+  color: ${colors.ink};
+  border: 1px solid ${colors.ink};
+  padding: 0.25rem 0.5rem;
+  background: none;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${colors.white};
+  }
+`;
+
+const emptyMessageStyles = css`
+  text-align: center;
+  font-family: ${fonts.mono};
+  font-size: ${fontSize.base};
+  opacity: 0.5;
+  padding: 1rem;
+`;
+
+const noteListStyles = css`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const noteItemStyles = (isSelected: boolean) => css`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 2px solid;
+  cursor: pointer;
+  transition: ${transitions.fast};
+
+  ${isSelected
+    ? css`
+        background-color: ${colors.white};
+        border-color: ${colors.ink};
+        box-shadow: ${shadows.retroSm};
+        transform: translate(-2px, -2px);
+      `
+    : css`
+        background-color: transparent;
+        border-color: rgba(26, 26, 26, 0.2);
+
+        &:hover {
+          border-color: rgba(26, 26, 26, 0.5);
+        }
+      `}
+`;
+
+const checkboxStyles = (isSelected: boolean) => css`
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.25rem;
+  border: 2px solid ${colors.ink};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-color: ${isSelected ? colors.accent : 'transparent'};
+`;
+
+const checkmarkStyles = css`
+  color: ${colors.white};
+  font-size: ${fontSize.xs};
+  font-weight: 700;
+`;
+
+const noteContentStyles = css`
+  flex: 1;
+  min-width: 0;
+`;
+
+const noteTitleStyles = css`
+  font-family: ${fonts.mono};
+  font-size: ${fontSize.sm};
+  color: ${colors.ink};
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const noteDateStyles = css`
+  font-size: ${fontSize.xs};
+  color: rgba(26, 26, 26, 0.6);
+  font-family: ${fonts.mono};
+  margin-top: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const previewSectionStyles = css`
+  margin-top: 1.5rem;
+`;
+
+const previewLabelStyles = css`
+  font-family: ${fonts.mono};
+  font-size: ${fontSize.sm};
+  font-weight: 700;
+  color: rgba(26, 26, 26, 0.5);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.5rem;
+`;
+
+const previewContainerStyles = css`
+  background-color: ${colors.white};
+  border: 2px solid ${colors.ink};
+  padding: 0.5rem;
+  max-height: 8rem;
+  overflow: auto;
+`;
+
+const previewTextStyles = css`
+  font-family: ${fonts.mono};
+  font-size: ${fontSize.xs};
+  color: ${colors.ink};
+  white-space: pre-wrap;
+  word-break: break-all;
+`;
+
+const footerStyles = css`
+  padding: 1.25rem;
+  border-top: 2px solid ${colors.ink};
+  background-color: ${colors.white};
+  display: flex;
+  gap: 0.75rem;
+`;
+
+const footerButtonStyles = css`
+  flex: 1;
+  font-size: ${fontSize.sm};
+`;
+
 export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, notes }) => {
-  // Initialize with all notes selected - recalculate when notes change
   const allNoteIds = useMemo(() => new Set(notes.map((n) => n.id)), [notes]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
 
-  // Sync selectedIds when notes change (select all new notes)
   const [prevNoteIds, setPrevNoteIds] = useState<Set<string>>(() => new Set());
   if (isOpen && allNoteIds !== prevNoteIds) {
     setSelectedIds(new Set(allNoteIds));
@@ -67,56 +277,39 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, notes
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/30 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="bg-paper border-2 border-ink shadow-retro flex flex-col max-h-[85vh] w-full max-w-lg paper-texture"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="p-5 border-b-2 border-ink bg-white">
-          <h2 className="font-mono text-xl font-bold text-ink mb-1 flex items-center gap-2">
-            <span className="w-2 h-6 bg-accent"></span>
+    <div css={overlayStyles} onClick={onClose}>
+      <div css={containerStyles} onClick={(e) => e.stopPropagation()}>
+        <div css={headerStyles}>
+          <h2 css={titleStyles}>
+            <span css={titleAccentStyles} />
             EXPORT DATA
           </h2>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 bg-paper">
-          <div className="flex justify-between items-center mb-4">
-            <span className="font-mono text-xs font-bold text-ink/50 uppercase">Select Notes</span>
-            <button
-              onClick={toggleAll}
-              className="text-xs font-mono text-ink border border-ink px-2 py-1 hover:bg-white"
-            >
+        <div css={contentStyles}>
+          <div css={selectHeaderStyles}>
+            <span css={selectLabelStyles}>Select Notes</span>
+            <button onClick={toggleAll} css={toggleButtonStyles}>
               {selectedIds.size === notes.length ? 'NONE' : 'ALL'}
             </button>
           </div>
 
           {notes.length === 0 ? (
-            <p className="text-center font-mono text-sm opacity-50 py-4">No notes available.</p>
+            <p css={emptyMessageStyles}>No notes available.</p>
           ) : (
-            <div className="space-y-2">
+            <div css={noteListStyles}>
               {notes.map((note) => (
                 <div
                   key={note.id}
                   onClick={() => toggleNote(note.id)}
-                  className={`flex items-start gap-3 p-3 border-2 cursor-pointer transition-all ${selectedIds.has(note.id) ? 'bg-white border-ink shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] translate-x-[-2px] translate-y-[-2px]' : 'bg-transparent border-ink/20 hover:border-ink/50'}`}
+                  css={noteItemStyles(selectedIds.has(note.id))}
                 >
-                  <div
-                    className={`w-4 h-4 mt-1 border-2 border-ink flex items-center justify-center ${selectedIds.has(note.id) ? 'bg-accent' : 'bg-transparent'}`}
-                  >
-                    {selectedIds.has(note.id) && (
-                      <span className="text-white text-[10px] font-bold">✓</span>
-                    )}
+                  <div css={checkboxStyles(selectedIds.has(note.id))}>
+                    {selectedIds.has(note.id) && <span css={checkmarkStyles}>✓</span>}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-mono text-xs text-ink truncate font-bold">
-                      {note.content.split('\n')[0] || 'Untitled'}
-                    </p>
-                    <p className="text-[10px] text-ink/60 truncate font-mono mt-1">
-                      {new Date(note.createdAt).toLocaleDateString()}
-                    </p>
+                  <div css={noteContentStyles}>
+                    <p css={noteTitleStyles}>{note.content.split('\n')[0] || 'Untitled'}</p>
+                    <p css={noteDateStyles}>{new Date(note.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
               ))}
@@ -124,25 +317,21 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, notes
           )}
 
           {selectedIds.size > 0 && (
-            <div className="mt-6">
-              <span className="font-mono text-xs font-bold text-ink/50 uppercase block mb-2">
-                Preview
-              </span>
-              <div className="bg-white border-2 border-ink p-2 max-h-32 overflow-auto">
-                <pre className="font-mono text-[10px] text-ink whitespace-pre-wrap break-all">
-                  {JSON.stringify(selectedNotes, null, 2)}
-                </pre>
+            <div css={previewSectionStyles}>
+              <span css={previewLabelStyles}>Preview</span>
+              <div css={previewContainerStyles}>
+                <pre css={previewTextStyles}>{JSON.stringify(selectedNotes, null, 2)}</pre>
               </div>
             </div>
           )}
         </div>
 
-        <div className="p-5 border-t-2 border-ink bg-white flex gap-3">
+        <div css={footerStyles}>
           <Button
             variant="primary"
             onClick={handleDownload}
             disabled={selectedIds.size === 0}
-            className="flex-1 text-xs"
+            css={footerButtonStyles}
           >
             Download
           </Button>
@@ -150,7 +339,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, notes
             variant="secondary"
             onClick={handleCopy}
             disabled={selectedIds.size === 0}
-            className="flex-1 text-xs"
+            css={footerButtonStyles}
           >
             Copy
           </Button>

@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from './components/Header';
 import { NoteCard } from './components/NoteCard';
@@ -9,9 +11,145 @@ import { ConfirmModal } from './components/ConfirmModal';
 import { SettingsModal } from './components/SettingsModal';
 import { Note, AppSettings } from './types';
 import { getNotes, saveNotes, generateId, getSettings, saveSettings } from './services/storage';
+import { colors, zIndex, mixins, fonts, fontSize } from './styles';
+
+// Styles
+const appContainerStyles = css`
+  min-height: 100vh;
+  padding-bottom: 6rem;
+  background-color: ${colors.paper};
+  ${mixins.paperTexture}
+  font-family: ${fonts.mono};
+  position: relative;
+  display: flex;
+  flex-direction: column;
+`;
+
+const mainContainerStyles = css`
+  max-width: 42rem;
+  margin: 0 auto;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const mainContentStyles = css`
+  flex: 1;
+  padding: 1.5rem;
+`;
+
+const emptyStateStyles = css`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 16rem;
+  opacity: 0.5;
+  text-align: center;
+`;
+
+const emptyIconStyles = css`
+  width: 3rem;
+  height: 3rem;
+  border: 2px dashed ${colors.ink};
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+`;
+
+const emptyIconTextStyles = css`
+  font-size: ${fontSize.xxl};
+  font-family: ${fonts.mono};
+  font-style: italic;
+`;
+
+const emptyMessageStyles = css`
+  font-family: ${fonts.mono};
+  color: ${colors.ink};
+  font-size: ${fontSize.base};
+`;
+
+const filterHeaderStyles = css`
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px dashed rgba(26, 26, 26, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  @keyframes fadeInSlide {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  animation: fadeInSlide 200ms ease-out;
+`;
+
+const filterLabelStyles = css`
+  font-family: ${fonts.mono};
+  font-size: ${fontSize.sm};
+  color: rgba(26, 26, 26, 0.5);
+  text-transform: uppercase;
+  font-weight: 700;
+`;
+
+const clearFilterButtonStyles = css`
+  font-size: ${fontSize.xs};
+  color: ${colors.accent};
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const notesGridStyles = css`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+`;
+
+const stickyButtonContainerStyles = css`
+  position: fixed;
+  bottom: 2rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: ${zIndex.stickyButton};
+  pointer-events: none;
+`;
+
+const stickyButtonWrapperStyles = css`
+  pointer-events: auto;
+`;
+
+const createButtonStyles = css`
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: ${fontSize.xxl};
+  transform-origin: center;
+  transition: transform 150ms ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+`;
 
 const App: React.FC = () => {
-  // Initialize state lazily to ensure it runs once and doesn't cause hydration/effect loops
   const [notes, setNotes] = useState<Note[]>(() => getNotes());
   const [settings, setSettings] = useState<AppSettings>(() => getSettings());
 
@@ -22,7 +160,6 @@ const App: React.FC = () => {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Date Range State
   const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>({
     start: null,
     end: null,
@@ -30,12 +167,10 @@ const App: React.FC = () => {
 
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
 
-  // Persist notes whenever they change
   useEffect(() => {
     saveNotes(notes);
   }, [notes]);
 
-  // Persist settings
   useEffect(() => {
     saveSettings(settings);
   }, [settings]);
@@ -51,7 +186,6 @@ const App: React.FC = () => {
   };
 
   const requestDeleteNote = (e: React.MouseEvent, id: string) => {
-    // Stop propagation is handled in NoteCard, but good to have here too just in case
     e.stopPropagation();
     setDeletingNoteId(id);
   };
@@ -67,12 +201,10 @@ const App: React.FC = () => {
     const timestamp = Date.now();
 
     if (id) {
-      // Update existing
       setNotes((prev) =>
         prev.map((n) => (n.id === id ? { ...n, title, content, updatedAt: timestamp } : n))
       );
     } else {
-      // Create new
       const newNote: Note = {
         id: generateId(),
         title,
@@ -84,7 +216,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Logic for active dates in calendar
   const activeDates = useMemo(() => {
     const dates = new Set<string>();
     notes.forEach((note) => {
@@ -101,7 +232,6 @@ const App: React.FC = () => {
     return dates;
   }, [notes]);
 
-  // Logic for filtering list by range
   const filteredNotes = useMemo(() => {
     if (!dateRange.start) return notes;
 
@@ -116,18 +246,16 @@ const App: React.FC = () => {
 
     return notes.filter((note) => {
       const noteDate = new Date(note.createdAt);
-      // If only start is selected, show everything after start
       if (!endFilter) {
         return noteDate >= startFilter;
       }
-      // If range, show within range
       return noteDate >= startFilter && noteDate <= endFilter;
     });
   }, [notes, dateRange]);
 
   return (
-    <div className="min-h-screen pb-24 bg-paper paper-texture font-mono relative flex flex-col">
-      <div className="max-w-2xl mx-auto min-h-screen w-full flex flex-col">
+    <div css={appContainerStyles}>
+      <div css={mainContainerStyles}>
         <Header
           onToggleCalendar={() => setIsCalendarOpen(true)}
           isCalendarOpen={isCalendarOpen}
@@ -144,33 +272,33 @@ const App: React.FC = () => {
           activeDates={activeDates}
         />
 
-        <main className="flex-1 p-6">
+        <main css={mainContentStyles}>
           {filteredNotes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 opacity-50 text-center">
-              <div className="w-12 h-12 border-2 border-ink border-dashed rounded-full flex items-center justify-center mb-4">
-                <span className="text-2xl font-mono italic">{dateRange.start ? '0' : '?'}</span>
+            <div css={emptyStateStyles}>
+              <div css={emptyIconStyles}>
+                <span css={emptyIconTextStyles}>{dateRange.start ? '0' : '?'}</span>
               </div>
-              <p className="font-mono text-ink text-sm">
+              <p css={emptyMessageStyles}>
                 {dateRange.start ? `No notes in selected range.` : 'Type something...'}
               </p>
             </div>
           ) : (
             <>
               {dateRange.start && (
-                <div className="mb-4 pb-2 border-b-2 border-dashed border-ink/20 flex justify-between items-center animate-in fade-in slide-in-from-top-2">
-                  <span className="font-mono text-xs text-ink/50 uppercase font-bold">
+                <div css={filterHeaderStyles}>
+                  <span css={filterLabelStyles}>
                     Range: {dateRange.start.toLocaleDateString()}
                     {dateRange.end ? ` — ${dateRange.end.toLocaleDateString()}` : ' +'}
                   </span>
                   <button
                     onClick={() => setDateRange({ start: null, end: null })}
-                    className="text-[10px] text-accent hover:underline font-bold tracking-widest uppercase"
+                    css={clearFilterButtonStyles}
                   >
                     CLEAR
                   </button>
                 </div>
               )}
-              <div className="grid grid-cols-1 gap-3">
+              <div css={notesGridStyles}>
                 {filteredNotes.map((note) => (
                   <NoteCard
                     key={note.id}
@@ -185,13 +313,12 @@ const App: React.FC = () => {
         </main>
       </div>
 
-      {/* Sticky Bottom Action */}
-      <div className="fixed bottom-8 left-0 right-0 flex justify-center z-30 pointer-events-none">
-        <div className="pointer-events-auto">
+      <div css={stickyButtonContainerStyles}>
+        <div css={stickyButtonWrapperStyles}>
           <Button
             variant="icon"
             onClick={handleCreateNote}
-            className="w-14 h-14 text-2xl transform transition hover:scale-105"
+            css={createButtonStyles}
             aria-label="Create new note"
           >
             <svg
@@ -205,8 +332,8 @@ const App: React.FC = () => {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
           </Button>
         </div>
